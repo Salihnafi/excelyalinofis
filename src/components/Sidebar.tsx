@@ -25,7 +25,7 @@ export default function Sidebar() {
     <aside className="w-72 h-screen fixed top-0 left-0 bg-red-600 flex flex-col z-50 text-white shadow-2xl">
       <div className="p-6 flex items-center justify-center bg-white border-b-4 border-red-700">
         <img 
-          src="/logo.png" 
+          src="/yalinofisexcel/logo.png" 
           alt="Kelebek Logo" 
           className="w-full max-h-36 object-contain drop-shadow-sm"
         />
