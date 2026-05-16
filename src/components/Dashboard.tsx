@@ -11,8 +11,8 @@ import {
   LineChart, BarChart, Cell
 } from 'recharts';
 
-// Excel'den gelen verileri kesinlikle sayı formatına çeviren güvenli dönüştürücü
-const parseValue = (val) => {
+// TypeScript için 'any' tipi eklendi ve sayı dönüşümü güvenli hale getirildi
+const parseValue = (val: any): number | null => {
   if (val === null || val === undefined || val === '') return null;
   const num = Number(val);
   return isNaN(num) ? null : num;
@@ -23,14 +23,14 @@ export default function Dashboard() {
   const [isExporting, setIsExporting] = useState(false);
 
   const allKpis = useMemo(() => {
-    const kpiSet = new Set();
+    const kpiSet = new Set<string>(); // TS Tipi eklendi
     data.forEach(month => {
       Object.keys(month.kpis).forEach(kpi => kpiSet.add(kpi));
     });
     return Array.from(kpiSet).sort();
   }, [data]);
 
-  const getChartDataForKpi = (kpi) => {
+  const getChartDataForKpi = (kpi: string) => { // TS Tipi eklendi
     return data.map(month => {
       const kpiData = month.kpis[kpi];
       
@@ -170,135 +170,20 @@ export default function Dashboard() {
                            <Line name="Hedef" type="stepAfter" dataKey="target" stroke="#94a3b8" strokeWidth={3} strokeDasharray="5 5" dot={false} activeDot={false} />
                            
                            <Line name="Gerçekleşen" type="monotone" dataKey="actual" stroke="#3b82f6" strokeWidth={4} 
-                             dot={(props) => {
+                             dot={(props: any) => { // TS Tipi eklendi
                                 const { cx, cy, payload, value } = props;
                                 const isGreen = payload.target === null || (isLowerBetterKpi ? value <= payload.target : value >= payload.target);
                                 return <circle cx={cx} cy={cy} r={5} fill="#ffffff" strokeWidth={2} stroke={isGreen ? "#10b981" : "#ef4444"} key={`dot-${props.index}`} />;
                              }}
-                             activeDot={(props) => {
+                             activeDot={(props: any) => { // TS Tipi eklendi
                                 const { cx, cy, payload, value } = props;
                                 const isGreen = payload.target === null || (isLowerBetterKpi ? value <= payload.target : value >= payload.target);
                                 return <circle cx={cx} cy={cy} r={7} fill={isGreen ? "#10b981" : "#ef4444"} strokeWidth={0} key={`activedot-${props.index}`} />;
                              }}
                            >
-                             <LabelList dataKey="actual" position="top" content={(props) => {
+                             <LabelList dataKey="actual" position="top" content={(props: any) => { // TS Tipi eklendi
                                 const { x, y, value, index } = props;
                                 const dataPoint = chartData[index];
                                 const isGreen = dataPoint && (dataPoint.target === null || (isLowerBetterKpi ? value <= dataPoint.target : value >= dataPoint.target));
                                 return (
-                                  <text x={x} y={y - 14} fill={isGreen ? "#10b981" : "#ef4444"} fontSize={14} fontWeight="bold" textAnchor="middle">
-                                    {value !== null && value !== undefined ? `%${value}` : ''}
-                                  </text>
-                                );
-                             }} />
-                           </Line>
-                         </LineChart>
-                       );
-                     } else if (isBarChart) {
-                       return (
-                         <BarChart data={chartData} margin={{ top: 35, right: 10, left: -10, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                            <XAxis dataKey="name" stroke="#94a3b8" tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }} axisLine={false} tickLine={false} dy={10} />
-                            <YAxis 
-                              stroke="#94a3b8" 
-                              tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }} 
-                              axisLine={false} 
-                              tickLine={false} 
-                              tickFormatter={(value) => {
-                                if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
-                                return value;
-                              }}
-                            />
-                            <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '12px' }} />
-                            <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                            
-                            <Bar name="Hedef" dataKey="target" fill="#cbd5e1" radius={[4, 4, 0, 0]} maxBarSize={60}>
-                              <LabelList dataKey="target" position="top" fill="#64748b" fontSize={14} fontWeight="bold" />
-                            </Bar>
-                            <Bar name="Gerçekleşen" dataKey="actual" radius={[4, 4, 0, 0]} maxBarSize={60}>
-                              {chartData.map((entry, index) => {
-                                const isGreen = entry.target === null || (isLowerBetterKpi ? entry.actual <= entry.target : entry.actual >= entry.target);
-                                return <Cell key={`cell-${index}`} fill={isGreen ? "#10b981" : "#ef4444"} />;
-                              })}
-                              <LabelList dataKey="actual" position="top" content={(props) => {
-                                const { x, y, value, index } = props;
-                                const dataPoint = chartData[index];
-                                const isGreen = dataPoint && (dataPoint.target === null || (isLowerBetterKpi ? value <= dataPoint.target : value >= dataPoint.target));
-                                return (
-                                  <text x={x} y={y - 14} fill={isGreen ? "#10b981" : "#ef4444"} fontSize={14} fontWeight="bold" textAnchor="middle">
-                                    {value !== null && value !== undefined ? value : ''}
-                                  </text>
-                                );
-                              }} />
-                            </Bar>
-                         </BarChart>
-                       );
-                     } else {
-                       return (
-                         <ComposedChart data={chartData} margin={{ top: 35, right: 10, left: -10, bottom: 0 }}>
-                           <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                           <XAxis dataKey="name" stroke="#94a3b8" tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }} axisLine={false} tickLine={false} dy={10} />
-                           
-                           <YAxis 
-                             yAxisId="left"
-                             stroke="#94a3b8" 
-                             tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }} 
-                             axisLine={false} 
-                             tickLine={false} 
-                             tickFormatter={(value) => {
-                               if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
-                               return value;
-                             }}
-                           />
-                           {!hideRatio && (
-                             <YAxis 
-                               yAxisId="right"
-                               orientation="right"
-                               stroke="#3b82f6" 
-                               tick={{ fill: '#3b82f6', fontSize: 12, fontWeight: 600 }} 
-                               axisLine={false} 
-                               tickLine={false}
-                               tickFormatter={(value) => `%${value}`}
-                             />
-                           )}
-                           
-                           <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '12px' }} />
-                           <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                           
-                           <Bar yAxisId="left" name="Hedef" dataKey="target" fill="#cbd5e1" radius={[4, 4, 0, 0]} maxBarSize={60}>
-                             <LabelList dataKey="target" position="top" fill="#64748b" fontSize={14} fontWeight="bold" />
-                           </Bar>
-                           <Bar yAxisId="left" name="Gerçekleşen" dataKey="actual" radius={[4, 4, 0, 0]} maxBarSize={60}>
-                             {chartData.map((entry, index) => {
-                               const isGreen = entry.target === null || (isLowerBetterKpi ? entry.actual <= entry.target : entry.actual >= entry.target);
-                               return <Cell key={`cell-${index}`} fill={isGreen ? "#10b981" : "#ef4444"} />;
-                             })}
-                             <LabelList dataKey="actual" position="top" content={(props) => {
-                                const { x, y, value, index } = props;
-                                const dataPoint = chartData[index];
-                                const isGreen = dataPoint && (dataPoint.target === null || (isLowerBetterKpi ? value <= dataPoint.target : value >= dataPoint.target));
-                                return (
-                                  <text x={x} y={y - 14} fill={isGreen ? "#10b981" : "#ef4444"} fontSize={14} fontWeight="bold" textAnchor="middle">
-                                    {value !== null && value !== undefined ? value : ''}
-                                  </text>
-                                );
-                             }} />
-                           </Bar>
-                           {!hideRatio && (
-                             <Line yAxisId="right" name="Oran (%)" type="monotone" dataKey="ratio" stroke="#3b82f6" strokeWidth={4} dot={{ r: 5, fill: '#ffffff', strokeWidth: 2, stroke: '#3b82f6' }} activeDot={{ r: 7, fill: '#3b82f6', strokeWidth: 0 }}>
-                               <LabelList dataKey="ratio" position="top" fill="#3b82f6" fontSize={14} fontWeight="bold" formatter={(value) => `%${value}`} />
-                             </Line>
-                           )}
-                         </ComposedChart>
-                       );
-                     }
-                   })()}
-                 </ResponsiveContainer>
-               </div>
-             </div>
-           );
-        })}
-      </div>
-    </div>
-  );
-}
+                                  <text x={x} y={y - 14} fill={isGreen ? "#10b981" : "#ef4444"} fontSize={14} fontWeight
