@@ -1,0 +1,19 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // Projenin statik HTML olarak dışa aktarılmasını sağlar
+  output: 'export',
+
+  // GitHub Pages'te sitenin "kullaniciadi.github.io/yalinofisexcel/" şeklinde 
+  // düzgün görünmesi için repository adını buraya ekliyoruz:
+  basePath: '/yalinofisexcel',
+
+  // Görsellerin ve stil dosyalarının doğru yoldan çekilmesi için:
+  assetPrefix: '/yalinofisexcel',
+
+  // Eğer projende <Image /> bileşeni kullanıyorsan statik export için bunu kapatmalısın
+  images: {
+    unoptimized: true,
+  },
+};
+
+export default nextConfig;
